@@ -1,13 +1,30 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import {
+  Route,
+  RouterProvider,
+  createBrowserRouter,
+  createRoutesFromElements
+} from "react-router-dom";
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { SignIn } from './components/sign-in'
+
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <>
+      <Route index element={<App/>} />
+      <Route path="/signin" element={<SignIn/>} />
+      <Route path="/signup" element={<SignIn/>} />
+    </>
+  )
+);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
 
