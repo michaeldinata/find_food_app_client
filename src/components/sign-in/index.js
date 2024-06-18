@@ -1,46 +1,68 @@
 import { useState } from "react"
 import "./assets/styles.css"
 import "bootstrap/dist/css/bootstrap.css"
+import IconButton from "@mui/material/IconButton";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import InputAdornment from "@mui/material/InputAdornment";
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import Input from '@mui/material/Input'
 import { Submit } from "./helpers"
-import { APIlink } from "../../App"
 import { Link, redirect } from "react-router-dom";
+import { api } from '../../index'
 
 export function SignIn() {
     const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
+    const [pwValues, setPwValues] = useState({
+        password: "",
+        showPassword: false
+    })
     const [error, setError] = useState(null)
+
+    const handleClickShowPassword = () => {
+        setPwValues({
+            ...pwValues,
+            showPassword: !pwValues.showPassword
+        })
+    }
+
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault()
+    }
+
+    const handlePasswordChange = (prop) => (event) => {
+        setPwValues({
+            ...pwValues,
+            [prop]: event.target.value
+        })
+    }
 
     const handleSubmit = async (event, password, email) => {
         event.preventDefault();
 
-        var myHeaders = new Headers();
-        myHeaders.set('Authorization', 'Basic ' + encodeURI(email + ":" + password));
-        
-        var requestOptions = {
-            method: "GET",
-            headers: myHeaders,
-            redirect: 'follow'
-        }
-
         let response;
 
-        try{
-            response = await fetch (`${APIlink}/login`, requestOptions)
-        } catch(err) {
-            console.log(err)
-            setError(err);
-            return;
-        }
-
-        console.log(response)
-        const result = await response.text();
-        const json = JSON.parse(result);
+        response = api.post('login/', {
+            "email": email,
+            "password": password
+        }, {
+            headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": localStorage.getItem('csrf')
+            },
+            withCredentials: true
+        }).then(res => {
+            const isLogin = res.data['login']
+            if (isLogin) localStorage.setItem('isAuthenticated', true);
+        }, error => {
+            console.log(error)
+        })
+        
 
         if(response.status === 200) {
             setError(null);
             localStorage.setItem('isAuthenticated', true);
         } else {
-            setError(json.error)
+            setError(null)
         }
     }
 
@@ -71,14 +93,32 @@ export function SignIn() {
                 </small>
 
                 <div className="input-group mb-3">
-                <input className="form-control form-control-lg"
-                type="text"
+                <Input className="form-control form-control-lg"
+                type= {pwValues.showPassword ? "text" : "password"}
                 id="password"
-                value={password}
+                value={pwValues.password}
                 placeholder="password"
-                onChange={(event) => {
-                    setError("")
-                    setPassword(event.target.value)}}/>
+                onChange={handlePasswordChange("password")}
+                disableUnderline={true}
+                endAdornment={
+                    <InputAdornment position="end">
+                        <IconButton
+                            onClick={
+                                handleClickShowPassword
+                            }
+                            onMouseDown={
+                                handleMouseDownPassword
+                            }
+                        >
+                            {pwValues.showPassword ? (
+                                <VisibilityIcon />
+                            ) : (
+                                <VisibilityOffIcon />
+                            )}
+                        </IconButton>
+                    </InputAdornment>
+                }
+                />
                 </div>
 
                 <small style={{ color: "red", height: "10px", display: "inline-block"}}>
@@ -92,11 +132,11 @@ export function SignIn() {
                 <button className="button"
                     onClick={(event) => {
                     console.log(email)
-                    console.log(password)
+                    console.log(pwValues.password)
                     console.log(event)
                     event.preventDefault();
-                    if(email != "" && password != "") {
-                        handleSubmit(event, password, email);
+                    if(email != "" && pwValues.password != "") {
+                        handleSubmit(event, pwValues.password, email);
                     } else {
                         setError("Email and Password cannot be empty!")
                     }
