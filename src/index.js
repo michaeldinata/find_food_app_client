@@ -6,6 +6,7 @@ import {
   createBrowserRouter,
   createRoutesFromElements
 } from "react-router-dom";
+import axios from 'axios'
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -27,6 +28,17 @@ root.render(
     <RouterProvider router={router} />
   </React.StrictMode>
 );
+
+let APIlink = 'https://127.0.0.1:8000/findfood/api/v1'
+let defaultTimeout = 30000
+
+axios.defaults.xsrfHeaderName = 'x-csrftoken'
+axios.defaults.xsrfCookieName = 'csrftoken'
+axios.defaults.withCredentials = true
+axios.defaults.baseURL = APIlink
+axios.defaults.timeout = defaultTimeout
+
+export const api = axios.create()
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
