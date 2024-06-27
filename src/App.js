@@ -42,6 +42,24 @@ class App extends Component {
     })
   }
 
+  handleFindFood(pos) {
+    let response;
+
+    response = api.post('findmefood/', {
+      "position": pos,
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        "X-CSRFToken": localStorage.getItem('csrf')
+        },
+      withCredentials: true
+    }).then(res => {
+      console.log(res)
+    }, error => {
+        console.log(error)
+    })
+  }
+
   render() {
     return (
       <div className="App">
@@ -52,14 +70,27 @@ class App extends Component {
         </div>
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <button className='button'
+            onClick={(event) => {
+              event.preventDefault();
+              if(navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                    const pos = {
+                      lat: position.coords.latitude,
+                      lng: position.coords.longitude
+                    };
+
+                    this.handleFindFood(pos)
+                  },
+                  () => {
+                    console.log("browser doesn't support geolocation")
+                  }
+                )
+              }
+            }}>
             Find Food For Me!
-          </a>
+          </button>
         </header>
       </div>
     );
