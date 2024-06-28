@@ -78,14 +78,16 @@ export function SignIn() {
 
             <form>
                 <div className="input-group mb-3">
-                <input className="form-control form-control-lg"
+                <Input className="form-control form-control-lg"
                 type="text"
                 id="email"
                 value={email}
                 placeholder="email address"
                 onChange={(event) => {
                     setError("")
-                    setEmail(event.target.value)}}/>
+                    setEmail(event.target.value)}}
+                    disableUnderline={true}
+                />
                 </div>
 
                 <small style={{ color: "red", height: "10px", display: "inline-block"}}>
